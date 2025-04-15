@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Vincitori premio IgNobel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    .winner-nome {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .winner-anno {
+      font-size: 1.8em;
+      margin-bottom: 5px;
+    }
+    .winner-campo {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+    }
+    .winner-descrizione {
+      font-size: 1.2em;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .error {
+      color: red;
+      font-size: 1.2em;
+      margin-top: 20px;
+    }
+    .info {
+      color: blue;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vincitori premio IgNobel</h1>
+  <div id="winner">
+    <!-- I dati del vincitore verranno inseriti qui -->
+  </div>
+  <script>
+    function loadWinners() {
+      fetch('ig_nobel_winners.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("HTTP error - Status: " + response.status + " (" + response.statusText + ")");
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!Array.isArray(data)) {
+            throw new Error("Il file JSON non contiene un array. Dati ricevuti: " + JSON.stringify(data));
+          }
+          if (data.length === 0) {
+            throw new Error("Il file JSON è vuoto.");
+          }
+          // Seleziona un vincitore casuale
+          const randomIndex = Math.floor(Math.random() * data.length);
+          const winner = data[randomIndex];
+          console.log("Vincitore selezionato:", winner);
+          
+          // Verifica la presenza delle chiavi richieste
+          const nome = winner.nome || "Nome non disponibile";
+          const anno = winner.anno || "Anno non disponibile";
+          const campo = winner.campo || "Campo non disponibile";
+          const descrizione = winner.descrizione || "Descrizione non disponibile";
+
+          const winnerHTML = `
+            <div class="winner-nome">${nome}</div>
+            <div class="winner-anno">${anno}</div>
+            <div class="winner-campo">${campo}</div>
+            <div class="winner-descrizione">${descrizione}</div>
+          `;
+          document.getElementById('winner').innerHTML = winnerHTML;
+        })
+        .catch(error => {
+          console.error("Errore durante il caricamento dei vincitori:", error);
+          let extraInfo = "";
+          if (window.location.protocol === "file:") {
+            extraInfo = " Assicurati di eseguire questa pagina tramite un server HTTP locale (ad esempio, usando 'python -m http.server').";
+          }
+          const errorMessage = `
+            <div class="error">Errore nel caricamento dei vincitori: ${error.message}</div>
+            <div class="info">Verifica che il file ig_nobel_winners.json sia presente nella stessa cartella e formattato correttamente.${extraInfo}</div>
+          `;
+          document.getElementById('winner').innerHTML = errorMessage;
+        });
+    }
+    
+    document.addEventListener("DOMContentLoaded", loadWinners);
+  </script>
+</body>
+</html>
